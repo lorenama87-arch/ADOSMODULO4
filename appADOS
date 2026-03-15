@@ -88,7 +88,6 @@ TEXTOS = {
 }
 
 # 3. INTERFAZ Y RECOLECCIÓN DE DATOS
-st.set_page_config(page_title="ADOS-2 Master M4", layout="wide")
 st.title("🔬 Sistema de Evaluación ADOS-2 Módulo 4")
 
 with st.sidebar:
