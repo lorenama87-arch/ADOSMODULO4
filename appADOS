@@ -1,0 +1,178 @@
+import streamlit as st
+from docx import Document
+from io import BytesIO
+
+# --- SISTEMA DE SEGURIDAD DE LA APP ---
+def check_password():
+    """Devuelve True si el usuario ingresó la contraseña correcta."""
+    def password_entered():
+        # Comprueba si la contraseña ingresada coincide con el "Secreto" del servidor
+        if st.session_state["password"] == st.secrets["password"]:
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Borramos la clave de la memoria por seguridad
+        else:
+            st.session_state["password_correct"] = False
+
+    # Si es la primera vez que entra a la web, muestra el input
+    if "password_correct" not in st.session_state:
+        st.text_input("🔐 Introduce la contraseña de acceso:", type="password", on_change=password_entered, key="password")
+        return False
+    # Si la metió mal
+    elif not st.session_state["password_correct"]:
+        st.text_input("🔐 Introduce la contraseña de acceso:", type="password", on_change=password_entered, key="password")
+        st.error("Contraseña incorrecta. Acceso denegado.")
+        return False
+    # Si la contraseña es correcta, permite pasar
+    else:
+        return True
+
+# Si la verificación falla, detenemos la ejecución de todo el script aquí mismo.
+if not check_password():
+    st.stop()
+
+# 1. LÓGICA DE PUNTUACIÓN
+def c(v):
+    """Conversión oficial del algoritmo (3->2, 7/8/9->0)"""
+    if v in [0, 7, 8, 9]: return 0
+    if v == 1: return 1
+    if v in [2, 3]: return 2
+    return 0
+
+# 2. CONSTANTES Y DICCIONARIOS
+TASKS = ["Tarea de construcción", "Contar una historia de un libro", "Descripción de una imagen", "Conversación y narración", "Trabajo o escuela", "Dificultades sociales", "Emociones", "Tarea de demostración", "Viñetas", "Descanso", "Vida diaria", "Amistades y matrimonio", "Soledad", "Planes e ilusiones", "Inventarse una historia"]
+
+ALGO_KEYS = {"A4", "A8", "A9", "A10", "B1", "B2", "B6", "B8", "B9", "B11", "B12"}
+
+UI_STRUCTURE = {
+    "A. Lenguaje": [("A1", [0,1,2,3]), ("A2", [0,1,2,7]), ("A3", [0,1,2,3]), ("A4", [0,1,2,3]), ("A5", [0,1,2]), ("A6", [0,1,2,3]), ("A7", [0,1,2,3]), ("A8", [0,1,2,3]), ("A9", [0,1,2,3,8]), ("A10", [0,1,2,3,8])],
+    "B. Social": [("B1", [0,2]), ("B2", [0,1,2]), ("B3", [0,1,2,7,8]), ("B4", [0,1,2,3]), ("B5", [0,1,2,3]), ("B6", [0,1,2]), ("B7", [0,1,2,3]), ("B8", [0,1,2]), ("B9", [0,1,2,3]), ("B10", [0,1,2,3,7]), ("B11", [0,1,2,3]), ("B12", [0,1,2,3]), ("B13", [0,1,2,3])],
+    "C. Imaginación": [("C1", [0,1,2,3])],
+    "D. Repetitivos": [("D1", [0,1,2,3]), ("D2", [0,1,2,3]), ("D3", [0,1,2,3]), ("D4", [0,1,2,3]), ("D5", [0,1,2])],
+    "E. Otros": [("E1", [0,1,2,3,7]), ("E2", [0,1,2,3]), ("E3", [0,1,2])]
+}
+
+TEXTOS = {
+    # Lenguaje y Comunicación
+    "A1": {0: "{art} utiliza frases de una manera generalmente correcta y compleja.", 1: "Utiliza habla relativamente compleja pero con errores gramaticales.", 2: "El habla se compone de expresiones de al menos tres palabras sin lenguaje complejo.", 3: "El habla consiste principalmente en frases simples."},
+    "A2": {0: "Entonación, volumen y ritmo adecuados.", 1: "Entonación monótona o volumen/ritmo levemente inusual.", 2: "Habla claramente anormal (mecánica o ritmo irregular).", 7: "Presenta trastorno de la fluidez verbal (tartamudeo)."},
+    "A4": {0: "No utiliza palabras o frases estereotipadas.", 1: "El lenguaje tiende a ser más repetitivo o formal.", 2: "Usa vocalizaciones estereotipadas o frases raras.", 3: "Habla casi exclusivamente estereotipada."},
+    "A8": {0: "La conversación es recíproca y fluye, construyéndose sobre el diálogo.", 1: "Aporta elaboración espontánea pero la cantidad de habla es limitada.", 2: "Poca conversación recíproca; sigue su propio tren de pensamiento.", 3: "Poca habla comunicativa espontánea."},
+    "A9": {0: "Emplea varios gestos descriptivos coordinados con el habla.", 1: "Gestos poco variados o uso frecuente de instrumentales.", 2: "Uso excepcional de gestos informativos únicamente.", 3: "Ausencia o uso muy limitado de gestos.", 8: "No aplicable."},
+    "A10": {0: "Utiliza una variedad de gestos enfáticos o emocionales bien integrados.", 1: "Gestos enfáticos limitados en frecuencia o integración.", 2: "Gestos enfáticos extraños o claramente mal integrados.", 3: "Escasos o nulos gestos enfáticos.", 8: "No aplicable."},
+    
+    # Interacción Social
+    "B1": {0: "{art} mantiene un contacto visual socialmente modulado y flexible.", 2: "Establece un contacto visual pobremente modulado."},
+    "B2": {0: "Dirige diversas expresiones faciales apropiadas al examinador.", 1: "Dirige algunas expresiones faciales con poca variedad.", 2: "No dirige expresiones faciales apropiadas al examinador."},
+    "B6": {0: "Demuestra una clara comprensión o identificación de las emociones de otros.", 1: "Transmite cierta comprensión e identifica alguna emoción ajena.", 2: "Escasa o nula identificación emocional ajena."},
+    "B8": {0: "Se describe a sí mismo como responsable de sus acciones.", 1: "Brinda una indicación clara de responsabilidad, pero no es consistente.", 2: "Muestra escasos indicios de sentido de la responsabilidad."},
+    "B9": {0: "Realiza iniciaciones sociales efectivas y claras.", 1: "Iniciaciones inusuales o centradas en intereses propios.", 2: "Iniciaciones inapropiadas o sin naturaleza social.", 3: "No realiza iniciaciones sociales."},
+    "B12": {0: "La comunicación social global es extensa y recíproca.", 1: "Comunicación recíproca reducida en frecuencia.", 2: "Comunicación orientada a objetos o preocupaciones.", 3: "Escasa o nula comunicación."},
+    
+    # Imaginación
+    "C1": {0: "Muestra creatividad y comentarios originales.", 1: "Acciones creativas poco variadas.", 2: "Imaginación limitada o repetitiva.", 3: "Ausencia de acciones creativas."},
+    
+    # Comportamientos Repetitivos
+    "D1": {0: "Sin intereses sensoriales inusuales.", 1: "Varios intereses sensoriales posibles.", 2: "Interés evidente por elementos sensoriales.", 3: "Búsqueda sensorial inusual."},
+    "D2": {0: "Sin manierismos de manos o dedos.", 1: "Manierismos no tan claros.", 2: "Retorcimientos de dedos evidentes.", 3: "Manierismos frecuentes."},
+    "D3": {0: "No intenta autolesionarse.", 1: "Autolesión dudosa.", 2: "Ejemplos claros de autolesión.", 3: "Autolesiones graves."},
+    "D4": {0: "Sin intereses excesivos en temas inusuales.", 1: "Referencias ocasionales a intereses inusuales.", 2: "Patrones de interés estereotipados.", 3: "Preocupaciones que interfieren."},
+    "D5": {0: "Ausencia de compulsiones o rituales.", 1: "Actividades fijadas a una rutina.", 2: "Rituales con característica compulsiva."},
+    
+    # Otros Comportamientos
+    "E1": {0: "Actividad apropiada.", 1: "Inquieto.", 2: "Dificultades para quedarse sentado.", 3: "Hiperactividad.", 7: "Muy quieto."},
+    "E2": {0: "No se muestra enfadado ni disruptivo.", 1: "Ligera disrupción.", 2: "Más de un comportamiento disruptivo.", 3: "Berrinches o agresión."},
+    "E3": {0: "Sin ansiedad evidente.", 1: "Signos leves de ansiedad.", 2: "Ansiedad marcada."}
+}
+
+# 3. INTERFAZ Y RECOLECCIÓN DE DATOS
+st.set_page_config(page_title="ADOS-2 Master M4", layout="wide")
+st.title("🔬 Sistema de Evaluación ADOS-2 Módulo 4")
+
+with st.sidebar:
+    gen = st.radio("Género:", ["Varón", "Mujer"])
+    edad = st.number_input("Edad:", 12, 99, 25)
+    art = "El evaluado" if gen == "Varón" else "La evaluada"
+    del_al = "del evaluado" if gen == "Varón" else "de la evaluada"
+
+tabs_names = ["Tareas"] + list(UI_STRUCTURE.keys())
+tabs = st.tabs(tabs_names)
+
+notas_tareas = {}
+with tabs[0]:
+    for t in TASKS:
+        notas_tareas[t] = st.text_input(f"Notas breves: {t}", key=f"task_{t}")
+
+scores = {}
+for i, (section, items) in enumerate(UI_STRUCTURE.items()):
+    with tabs[i+1]:
+        for key, options in items:
+            label = f"{key}*" if key in ALGO_KEYS else key
+            scores[key] = st.radio(label, options, horizontal=True)
+
+# 4. GENERACIÓN DEL INFORME
+if st.button("🚀 GENERAR INFORME TOTAL"):
+    
+    sc_C = sum(c(scores[k]) for k in ["A4", "A8", "A9", "A10"])
+    sc_ISR = sum(c(scores[k]) for k in ["B1", "B2", "B6", "B8", "B9", "B11", "B12"])
+    total = sc_C + sc_ISR
+    
+    if sc_C >= 3 and sc_ISR >= 6 and total >= 10: clima = "AUTISMO"
+    elif sc_C >= 2 and sc_ISR >= 4 and total >= 7: clima = "ESPECTRO AUTISTA"
+    else: clima = "NO TEA"
+
+    def get_text(k):
+        """Obtiene el texto base reemplazando las variables dinámicas."""
+        return TEXTOS.get(k, {}).get(scores[k], "").replace("{art}", art)
+
+    def format_sentence(text):
+        """Estandariza el texto: primera letra mayúscula y añade punto final si falta."""
+        if not text: return ""
+        text = text.strip()
+        text = text[0].upper() + text[1:]
+        if not text.endswith("."): text += "."
+        return text + " "
+
+    # Construcción narrativa de todas las secciones
+    redA = f"{get_text('A1')} {get_text('A2')} En la interacción verbal, {get_text('A4').lower()} Asimismo, {get_text('A8').lower()} Respecto a la gestualidad, {get_text('A9').lower()} y {get_text('A10').lower()}"
+    redB = f"{get_text('B1')} {get_text('B2')} Además, {get_text('B6').lower()} En cuanto a la conducta social, {get_text('B8').lower()}, {get_text('B9').lower()} y finalmente {get_text('B12').lower()}"
+    
+    # Ensamblaje secuencial limpio para C, D y E
+    redC = format_sentence(get_text('C1'))
+    
+    redD = format_sentence(get_text('D1')) + format_sentence(get_text('D2')) + \
+           format_sentence(get_text('D3')) + format_sentence(get_text('D4')) + \
+           format_sentence(get_text('D5'))
+           
+    redE = format_sentence(get_text('E1')) + format_sentence(get_text('E2')) + \
+           format_sentence(get_text('E3'))
+
+    intro_doc = f"APLICACIÓN ADOS-2\nEl ADOS-2 (Autism Diagnostic Observation Schedule, segunda edición) es una escala de observación estandarizada y validada internacionalmente para la evaluación de comportamientos relacionados con el espectro autista. El Módulo 4 es adecuado para adolescentes mayores y adultos con lenguaje fluido.\n\nDurante la evaluación, se generaron diversas situaciones estructuradas que permiten observar la comunicación, la interacción social, la imaginación y los intereses restringidos o comportamientos repetitivos {del_al}.\n\nPerfil observado durante la aplicación:"
+    
+    informe_final = (
+        f"{intro_doc}\n\n"
+        f"1. COMUNICACIÓN:\n{redA.strip()}\n\n"
+        f"2. INTERACCIÓN SOCIAL:\n{redB.strip()}\n\n"
+        f"3. IMAGINACIÓN:\n{redC.strip()}\n\n"
+        f"4. COMPORTAMIENTOS REPETITIVOS E INTERESES RESTRINGIDOS:\n{redD.strip()}\n\n"
+        f"5. OTROS COMPORTAMIENTOS ANORMALES:\n{redE.strip()}\n\n"
+        f"--- RESULTADOS DEL ALGORITMO ---\n"
+        f"Comunicación: {sc_C}\nInteracción: {sc_ISR}\nTOTAL: {total}\n"
+        f"CLASIFICACIÓN CLÍNICA: {clima}"
+    )
+
+    st.text_area("Vista previa del Informe:", informe_final, height=500)
+
+    # WORD Generator
+    doc = Document()
+    doc.add_heading('INFORME ADOS-2 (MÓDULO 4)', 0)
+    doc.add_paragraph(informe_final)
+    
+    notas_activas = {k: v for k, v in notas_tareas.items() if v.strip()}
+    if notas_activas:
+        doc.add_heading('Observaciones Específicas por Tarea', level=1)
+        for task, note in notas_activas.items():
+            doc.add_paragraph(f"{task}:", style='List Bullet').add_run(f" {note}")
+
+    bio = BytesIO()
+    doc.save(bio)
+    st.download_button("📥 Descargar Documento Word", bio.getvalue(), f"Informe_ADOS2_{gen}_{edad}.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
