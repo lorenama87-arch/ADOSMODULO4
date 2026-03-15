@@ -2,6 +2,9 @@ import streamlit as st
 from docx import Document
 from io import BytesIO
 
+# --- CONFIGURACIÓN DE PÁGINA (DEBE IR AQUÍ, ANTES DE CUALQUIER OTRA COSA) ---
+st.set_page_config(page_title="ADOS-2 Master M4", layout="wide")
+
 # --- SISTEMA DE SEGURIDAD DE LA APP ---
 def check_password():
     """Devuelve True si el usuario ingresó la contraseña correcta."""
