@@ -56,10 +56,10 @@ UI_STRUCTURE = {
 TEXTOS = {
     # A. Lenguaje y comunicación
     "A1": {
-        0: "{art} construye oraciones gramaticalmente correctas y de una complejidad adecuada.",
+        0: "construye oraciones gramaticalmente correctas y de una complejidad adecuada.",
         1: "utiliza un habla relativamente compleja, aunque con errores gramaticales ocasionales.",
-        2: "su habla se limita a expresiones de al menos tres palabras, sin llegar a una construcción compleja.",
-        3: "su habla consiste principalmente en frases simples y de corta longitud.",
+        2: "reduce su habla a expresiones de al menos tres palabras, sin llegar a una construcción compleja.",
+        3: "limita su habla principalmente a frases simples y de corta longitud.",
     },
     "A2": {
         0: "la entonación, el volumen y el ritmo del habla resultan adecuados al contexto.",
@@ -96,7 +96,7 @@ TEXTOS = {
 
     # B. Interacción social recíproca
     "B1": {
-        0: "{art} mantiene un contacto visual socialmente modulado y flexible.",
+        0: "mantiene un contacto visual socialmente modulado y flexible.",
         2: "establece un contacto visual pobremente modulado.",
     },
     "B2": {
@@ -129,7 +129,7 @@ TEXTOS = {
 
     # C. Imaginación
     "C1": {
-        0: "{art} muestra creatividad y aporta comentarios originales a lo largo de la evaluación.",
+        0: "muestra creatividad y aporta comentarios originales a lo largo de la evaluación.",
         1: "sus acciones creativas resultan poco variadas.",
         2: "su imaginación se muestra limitada o de carácter repetitivo.",
         3: "no se observan acciones de carácter creativo.",
@@ -234,63 +234,70 @@ if st.button("🚀 GENERAR INFORME TOTAL"):
         raw = TEXTOS.get(k, {}).get(scores[k], "")
         return raw.format(**VARS) if raw else raw
 
-    def frase(conector, texto):
+    def fusion(*clauses, subject=None, conector=""):
         """
-        Combina un conector (en minúscula, puede ir vacío) con el texto clínico
-        y devuelve una oración autónoma: primera letra en mayúscula y punto
-        final. Cada llamada produce una oración completa, de modo que al
-        unir varias con espacios el resultado son oraciones bien separadas
-        (y no un único punto seguido de minúscula).
+        Une entre 1 y 3 observaciones clínicas relacionadas en UNA sola
+        oración fluida (con "; " y una "y" final para más de una), en vez
+        de una oración corta y aislada por cada ítem. Esto es lo que evita
+        el efecto de "checklist"/plantilla: varias observaciones afines se
+        leen como una única idea, igual que las redactaría un profesional.
+
+        - subject: si se indica (p.ej. "El evaluado"), se antepone tal cual
+          y solo se usa UNA vez en todo el informe, para no repetir el
+          sujeto en cada frase (en español es normal omitirlo después).
+        - conector: frase de enlace en minúscula (p.ej. "por su parte, ")
+          para dar variedad entre oraciones sin repetir siempre la misma.
         """
-        s = (conector + texto).strip()
-        if not s:
+        parts = [c.strip().rstrip(".") for c in clauses if c and c.strip()]
+        if not parts:
             return ""
+        if len(parts) == 1:
+            cuerpo = parts[0]
+        else:
+            cuerpo = "; ".join(parts[:-1]) + " y " + parts[-1]
+        s = f"{subject} {cuerpo}" if subject else f"{conector}{cuerpo}"
+        s = s.strip()
         if not s.endswith((".", "!", "?")):
             s += "."
-        return s[0].upper() + s[1:]
+        if not s[0].isupper():
+            s = s[0].upper() + s[1:]
+        return s
 
     def parrafo(frases):
-        """Une oraciones ya formadas (ver frase()) en un único párrafo."""
+        """Une oraciones ya formadas (ver fusion()) en un único párrafo."""
         return " ".join(f for f in frases if f)
 
-    # --- Construcción narrativa de cada área, con conectores variados
-    #     para evitar el efecto de "checklist" del listado de frases sueltas.
-    #     Cada línea es una oración completa por sí misma. ---
+    # --- Construcción narrativa de cada área ---
+    # En vez de una frase suelta por cada ítem (efecto "checklist"), se
+    # agrupan los ítems afines en oraciones compuestas, y el sujeto
+    # explícito ("El evaluado"/"La evaluada") solo aparece UNA vez en todo
+    # el informe: el resto del texto lo omite, como es habitual en
+    # castellano cuando el sujeto ya está claro por el contexto.
 
     redA = parrafo([
-        frase("", get_text("A1")),
-        frase("Por lo que respecta a la prosodia, ", get_text("A2")),
-        frase("En el plano del uso del lenguaje, ", get_text("A4")),
-        frase("En el terreno conversacional, ", get_text("A8")),
-        frase("A nivel gestual, ", get_text("A9")),
-        frase("En cuanto a los gestos enfáticos, ", get_text("A10")),
+        fusion(get_text("A1"), get_text("A2"), subject=art),
+        fusion(get_text("A4"), get_text("A8"), conector="en el plano conversacional, "),
+        fusion(get_text("A9"), get_text("A10"), conector="a nivel no verbal, "),
     ])
 
     redB = parrafo([
-        frase("", get_text("B1")),
-        frase("", get_text("B2")),
-        frase("Por otro lado, ", get_text("B6")),
-        frase("En cuanto a la conducta social, ", get_text("B8")),
-        frase("", get_text("B9")),
-        frase("", get_text("B12")),
+        fusion(get_text("B1"), get_text("B2")),
+        fusion(get_text("B6"), get_text("B8"), conector="en el ámbito socioemocional, "),
+        fusion(get_text("B9"), get_text("B12"), conector="por su parte, "),
     ])
 
     redC = parrafo([
-        frase("", get_text("C1")),
+        fusion(get_text("C1")),
     ])
 
     redD = parrafo([
-        frase("", get_text("D1")),
-        frase("Asimismo, ", get_text("D2")),
-        frase("Por otro lado, ", get_text("D3")),
-        frase("En cuanto a sus intereses, ", get_text("D4")),
-        frase("Finalmente, en lo relativo a rituales y rutinas, ", get_text("D5")),
+        fusion(get_text("D1"), get_text("D2")),
+        fusion(get_text("D3"), conector="en cuanto a las conductas autolesivas, "),
+        fusion(get_text("D4"), get_text("D5"), conector="respecto a sus intereses y rutinas, "),
     ])
 
     redE = parrafo([
-        frase("Durante la evaluación, ", get_text("E1")),
-        frase("", get_text("E2")),
-        frase("En cuanto al estado emocional, ", get_text("E3")),
+        fusion(get_text("E1"), get_text("E2"), get_text("E3")),
     ])
 
     intro_doc = (
