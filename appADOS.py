@@ -67,11 +67,34 @@ TEXTOS = {
         2: "el habla resulta claramente anómala, con una cualidad mecánica o un ritmo irregular.",
         7: "presenta alteraciones en la fluidez verbal, con episodios de tartamudeo.",
     },
+    "A3": {
+        0: "no repite el habla ajena de forma ecolálica.",
+        1: "presenta algún eco ocasional del lenguaje de otras personas.",
+        2: "repite con cierta regularidad palabras o frases ajenas, combinado con algo de habla espontánea.",
+        3: "su habla consiste mayoritariamente en la repetición inmediata de lo que acaba de escuchar.",
+    },
     "A4": {
         0: "no emplea palabras ni frases estereotipadas.",
         1: "su lenguaje tiende a ser algo repetitivo o de un registro excesivamente formal.",
         2: "emplea vocalizaciones estereotipadas o expresiones idiosincrásicas.",
         3: "su habla es, casi en su totalidad, de carácter estereotipado.",
+    },
+    "A5": {
+        0: "comparte espontáneamente información sobre sus propios pensamientos, sentimientos o experiencias en diversas ocasiones.",
+        1: "en ocasiones aporta espontáneamente algún dato sobre sus pensamientos, sentimientos o experiencias.",
+        2: "apenas ofrece información espontánea sobre sí mismo, y cuando lo hace suele limitarse a sus intereses restringidos o a datos generales.",
+    },
+    "A6": {
+        0: "muestra interés espontáneo por los pensamientos, sentimientos o experiencias de su interlocutor, preguntando por ellos en diversas ocasiones.",
+        1: "en alguna ocasión pregunta a su interlocutor sobre sus pensamientos, sentimientos o experiencias.",
+        2: "responde adecuadamente cuando el interlocutor comparte sus propios pensamientos o experiencias, aunque no pregunta por ellos de forma espontánea.",
+        3: "rara vez muestra interés por los pensamientos, sentimientos o experiencias de su interlocutor.",
+    },
+    "A7": {
+        0: "describe un suceso concreto y no rutinario con información suficiente y coherente, sin necesitar preguntas específicas para completar el relato.",
+        1: "relata un hecho más rutinario con información suficiente, aunque necesita que se le anime inicialmente a describirlo.",
+        2: "depende de preguntas específicas para poder completar el relato de un suceso, o describe una situación poco verosímil.",
+        3: "ofrece respuestas insuficientes o inconsistentes, incluso ante preguntas concretas.",
     },
     "A8": {
         0: "mantiene una conversación recíproca y fluida, construyendo el intercambio sobre las aportaciones del interlocutor.",
@@ -84,14 +107,14 @@ TEXTOS = {
         1: "utiliza gestos poco variados o recurre con frecuencia a gestos de tipo instrumental.",
         2: "hace un uso excepcional de gestos informativos, de forma aislada.",
         3: "presenta ausencia o un uso muy limitado de gestos.",
-        8: "no procede valorar este aspecto.",
+        8: "no procede valorar el uso de gestos descriptivos.",
     },
     "A10": {
         0: "utiliza una variedad de gestos enfáticos o emocionales, bien integrados con el discurso.",
         1: "presenta gestos enfáticos limitados en frecuencia o en su integración con el habla.",
         2: "sus gestos enfáticos resultan llamativos o claramente mal integrados.",
         3: "presenta escasos o nulos gestos enfáticos.",
-        8: "no procede valorar este aspecto.",
+        8: "no procede valorar los gestos enfáticos.",
     },
 
     # B. Interacción social recíproca
@@ -104,10 +127,35 @@ TEXTOS = {
         1: "dirige algunas expresiones faciales, aunque con escasa variedad.",
         2: "no dirige expresiones faciales apropiadas al examinador.",
     },
+    "B3": {
+        0: "acompaña el habla de cambios sutiles y socialmente adecuados en la mirada, los gestos y la expresión facial.",
+        1: "coordina el habla con la comunicación no verbal de forma limitada, apoyándose casi en exclusiva en un único canal.",
+        2: "apenas combina el habla con comunicación no verbal.",
+        7: "evita algo la mirada directa, sobre todo al inicio de la evaluación, aunque mantiene cierta coordinación entre el lenguaje y la comunicación no verbal.",
+        8: "no procede valorar la coordinación entre el habla y la comunicación no verbal.",
+    },
+    "B4": {
+        0: "muestra disfrute compartido, adecuado al contexto, en más de una actividad o tema de conversación.",
+        1: "muestra cierto disfrute compartido adecuado al contexto, aunque limitado a una única interacción.",
+        2: "apenas comparte disfrute con su interlocutor, aunque puede mostrarlo de forma autodirigida.",
+        3: "apenas expresa disfrute a lo largo de la evaluación.",
+    },
+    "B5": {
+        0: "comunica con eficacia una variedad de emociones propias, presentes o pasadas.",
+        1: "describe haber sentido varias emociones, aunque con una capacidad limitada para comunicarlas con eficacia.",
+        2: "comunica al menos una emoción propia, de forma limitada.",
+        3: "apenas comunica sus propias emociones.",
+    },
     "B6": {
         0: "demuestra una clara comprensión e identificación de las emociones ajenas.",
         1: "transmite cierta comprensión e identifica alguna emoción ajena, de forma parcial.",
         2: "muestra escasa o nula identificación de las emociones de los demás.",
+    },
+    "B7": {
+        0: "comprende la naturaleza de varias relaciones sociales habituales, incluyendo su propio papel en al menos una de ellas.",
+        1: "comprende varias relaciones sociales típicas sin llegar a situar con claridad su propio papel en ellas, o bien comprende en profundidad una única relación.",
+        2: "muestra una comprensión parcial de una única relación social típica.",
+        3: "muestra una comprensión escasa o nula de las relaciones sociales habituales.",
     },
     "B8": {
         0: "se describe a sí mism{term} como responsable de sus propias acciones.",
@@ -120,11 +168,30 @@ TEXTOS = {
         2: "sus iniciaciones son inapropiadas o carecen de una finalidad social clara.",
         3: "no realiza iniciaciones sociales.",
     },
+    "B10": {
+        0: "realiza intentos frecuentes de captar y mantener la atención de su interlocutor, o de dirigirla hacia objetos, acciones o temas de su interés.",
+        1: "realiza algunos intentos de captar o dirigir la atención de su interlocutor, aunque con escasa frecuencia o en pocos contextos.",
+        2: "realiza intentos ocasionales de captar la atención de su interlocutor, casi siempre ligados a sus preocupaciones o intereses restringidos.",
+        3: "muestra escaso interés en si su interlocutor le presta atención, salvo cuando necesita ayuda.",
+        7: "reclama la atención de su interlocutor de forma inusualmente frecuente, intensa o excesiva.",
+    },
+    "B11": {
+        0: "responde de forma apropiada y variada a las distintas situaciones y demandas sociales del momento.",
+        1: "reacciona a la mayoría de las situaciones sociales, aunque de forma algo limitada, inconsistente o socialmente incómoda.",
+        2: "presenta respuestas sociales extrañas, estereotipadas o inapropiadas al contexto.",
+        3: "apenas responde a los intentos de su interlocutor por implicarle socialmente.",
+    },
     "B12": {
         0: "en conjunto, su comunicación social es extensa y recíproca.",
         1: "su comunicación recíproca se muestra reducida en frecuencia.",
         2: "su comunicación se orienta preferentemente hacia objetos o preocupaciones propias.",
         3: "presenta escasa o nula comunicación social.",
+    },
+    "B13": {
+        0: "mantiene con su interlocutor una interacción agradable y apropiada durante toda la evaluación.",
+        1: "la interacción resulta agradable en algunos momentos, aunque no de forma sostenida, y en ocasiones se percibe cierta artificialidad en su comportamiento.",
+        2: "la interacción resulta unilateral o inusual, lo que genera una sensación de incomodidad sostenida a lo largo de la evaluación.",
+        3: "muestra una consideración mínima hacia su interlocutor, y la sesión resulta marcadamente incómoda durante buena parte de su desarrollo.",
     },
 
     # C. Imaginación
@@ -276,14 +343,19 @@ if st.button("🚀 GENERAR INFORME TOTAL"):
 
     redA = parrafo([
         fusion(get_text("A1"), get_text("A2"), subject=art),
-        fusion(get_text("A4"), get_text("A8"), conector="en el plano conversacional, "),
+        fusion(get_text("A3"), get_text("A4"), conector="en cuanto al lenguaje repetitivo, "),
+        fusion(get_text("A5"), get_text("A6"), get_text("A8"), conector="por lo que respecta al intercambio conversacional, "),
+        fusion(get_text("A7"), conector="en la narración de sucesos, "),
         fusion(get_text("A9"), get_text("A10"), conector="a nivel no verbal, "),
     ])
 
     redB = parrafo([
-        fusion(get_text("B1"), get_text("B2")),
-        fusion(get_text("B6"), get_text("B8"), conector="en el ámbito socioemocional, "),
-        fusion(get_text("B9"), get_text("B12"), conector="por su parte, "),
+        fusion(get_text("B1"), get_text("B2"), get_text("B3")),
+        fusion(get_text("B4"), get_text("B5"), get_text("B6"), conector="en el terreno emocional, "),
+        fusion(get_text("B7"), get_text("B8"), conector="en cuanto a la comprensión social, "),
+        fusion(get_text("B9"), get_text("B10"), conector="respecto a sus iniciaciones sociales, "),
+        fusion(get_text("B11"), get_text("B12"), conector="en su respuesta y comunicación recíproca, "),
+        fusion(get_text("B13"), conector="en conjunto, "),
     ])
 
     redC = parrafo([
