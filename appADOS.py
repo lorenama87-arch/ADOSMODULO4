@@ -7,10 +7,12 @@ from io import BytesIO
 st.set_page_config(page_title="ADOS-2 Master M4", layout="wide")
 
 # --- SISTEMA DE SEGURIDAD DE LA APP ---
+APP_PASSWORD = "MARITA2026"
+
 def check_password():
     """Devuelve True si el usuario ingresó la contraseña correcta."""
     def password_entered():
-        if st.session_state["password"] == st.secrets["password"]:
+        if st.session_state["password"] == APP_PASSWORD:
             st.session_state["password_correct"] = True
             del st.session_state["password"]
         else:
